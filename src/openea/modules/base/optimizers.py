@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def generate_optimizer(loss, learning_rate, var_list=None, opt='SGD'):

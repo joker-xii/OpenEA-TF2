@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from openea.models.basic_model import BasicModel
 from openea.modules.base.initializers import init_embeddings

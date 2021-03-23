@@ -3,7 +3,7 @@ import random
 import time
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from sklearn import preprocessing
 
 import openea.modules.finding.evaluation as evaluation

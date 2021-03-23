@@ -1,11 +1,11 @@
 import math
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from openea.models.neural.proje import ProjE
 from openea.modules.base.optimizers import generate_optimizer
 from openea.modules.utils.util import load_session
-
+import tensorflow_addons as tfcontrib
 
 def dim_factorization(d):
     half = int(math.sqrt(d)) + 1
@@ -60,7 +60,7 @@ class ConvE(ProjE):
         ocnn = tf.nn.relu(ocnn)
         ocnn = tf.nn.dropout(ocnn, self.args.output_keep_prob)
         ocnn = tf.reshape(ocnn, [-1, self.args.filter_num * self.args.dim * 2])
-        ocnn = tf.contrib.layers.fully_connected(ocnn, self.args.dim)
+        ocnn = tfcontrib.layers.fully_connected(ocnn, self.args.dim)
         ocnn = tf.layers.batch_normalization(ocnn)
 
         with tf.name_scope('triple_loss'):

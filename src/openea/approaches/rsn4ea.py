@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from scipy.sparse import csr_matrix
 
 from openea.models.trans.transe import BasicModel
@@ -244,12 +244,12 @@ class RSN4EA(BasicReader, BasicSampler, BasicModel):
         self._entity_embedding = tf.get_variable(
             'entity_embedding',
             [self._ent_num, hidden_size],
-            initializer=tf.contrib.layers.xavier_initializer(uniform=False)
+            initializer=tf.initializers.glorot_normal()
         )
         self._relation_embedding = tf.get_variable(
             'relation_embedding',
             [self._rel_num, hidden_size],
-            initializer=tf.contrib.layers.xavier_initializer(uniform=False)
+            initializer=tf.initializers.glorot_normal()
         )
 
         self.ent_embeds, self.rel_embeds = self._entity_embedding, self._relation_embedding
@@ -257,7 +257,7 @@ class RSN4EA(BasicReader, BasicSampler, BasicModel):
         self._rel_w = tf.get_variable(
             "relation_softmax_w",
             [self._rel_num, hidden_size],
-            initializer=tf.contrib.layers.xavier_initializer(uniform=False)
+            initializer=tf.initializers.glorot_normal()
         )
         self._rel_b = tf.get_variable(
             "relation_softmax_b",
@@ -267,7 +267,7 @@ class RSN4EA(BasicReader, BasicSampler, BasicModel):
         self._ent_w = tf.get_variable(
             "entity_softmax_w",
             [self._ent_num, hidden_size],
-            initializer=tf.contrib.layers.xavier_initializer(uniform=False)
+            initializer=tf.initializers.glorot_normal()
         )
         self._ent_b = tf.get_variable(
             "entity_softmax_b",
@@ -282,7 +282,7 @@ class RSN4EA(BasicReader, BasicSampler, BasicModel):
         self._optimizer = tf.train.AdamOptimizer(options.learning_rate)  # , beta2=0.98, epsilon=1e-9
 
     def bn(self, inputs, is_train=True, reuse=True):
-        return tf.contrib.layers.batch_norm(inputs,
+        return tf.keras.layers.BatchNormalization(inputs,
                                             center=True,
                                             scale=True,
                                             is_training=is_train,
@@ -295,7 +295,7 @@ class RSN4EA(BasicReader, BasicSampler, BasicModel):
             hidden_size = self._options.hidden_size
 
         def basic_lstm_cell():
-            return tf.contrib.rnn.LSTMCell(
+            return tf.nn.rnn_cell.LSTMCell(
                 num_units=hidden_size,
                 initializer=tf.orthogonal_initializer,
                 forget_bias=1,
@@ -304,7 +304,7 @@ class RSN4EA(BasicReader, BasicSampler, BasicModel):
             )
 
         def drop_cell():
-            return tf.contrib.rnn.DropoutWrapper(
+            return tf.nn.rnn_cell.DropoutWrapper(
                 basic_lstm_cell(),
                 output_keep_prob=keep_prob
             )
@@ -317,7 +317,7 @@ class RSN4EA(BasicReader, BasicSampler, BasicModel):
         if num_layers == 0:
             return gen_cell()
 
-        cell = tf.contrib.rnn.MultiRNNCell(
+        cell = tf.nn.rnn_cell.MultiRNNCell(
             [gen_cell() for _ in range(num_layers)],
             state_is_tuple=True,
         )
@@ -403,9 +403,9 @@ class RSN4EA(BasicReader, BasicSampler, BasicModel):
         ent_outputs = outputs[::2]
 
         # RSN
-        res_rel_outputs = tf.contrib.layers.fully_connected(rel_outputs, hidden_size, biases_initializer=None,
-                                                            activation_fn=None) + \
-                          tf.contrib.layers.fully_connected(
+        res_rel_outputs = tf.keras.layers.Dense(rel_outputs, hidden_size, biases_initializer=None,
+                                                activation_fn=None) + \
+                          tf.keras.layers.Dense(
                               ent_bn_em, hidden_size, biases_initializer=None, activation_fn=None)
 
         # recover the order

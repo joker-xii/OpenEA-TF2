@@ -4,7 +4,7 @@ import multiprocessing
 import time
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from openea.modules.finding.similarity import sim
 from openea.modules.utils.util import task_divide, merge_dic

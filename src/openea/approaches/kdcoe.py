@@ -7,7 +7,7 @@ import time
 import gc
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from openea.models.basic_model import BasicModel
 from openea.modules.base.initializers import init_embeddings
@@ -315,24 +315,24 @@ class KDCoE(BasicModel):
                                                          shape=[None, self.default_desc_length, self.wv_dim],
                                                          name='desc2')
 
-            gru_1 = tf.contrib.keras.layers.GRU(units=self.wv_dim, return_sequences=True)
+            gru_1 = tf.keras.layers.GRU(units=self.wv_dim, return_sequences=True)
 
-            gru_5 = tf.contrib.keras.layers.GRU(units=self.wv_dim, return_sequences=True)
+            gru_5 = tf.keras.layers.GRU(units=self.wv_dim, return_sequences=True)
 
-            conv1 = tf.contrib.keras.layers.Conv1D(filters=self.wv_dim, kernel_size=3, strides=1, activation=tf.tanh,
+            conv1 = tf.keras.layers.Conv1D(filters=self.wv_dim, kernel_size=3, strides=1, activation=tf.tanh,
                                                    padding='valid', use_bias=True)
 
-            ds3 = tf.contrib.keras.layers.Dense(units=self.wv_dim, activation=tf.tanh, use_bias=True)
+            ds3 = tf.keras.layers.Dense(units=self.wv_dim, activation=tf.tanh, use_bias=True)
 
-            self._att1 = att1 = tf.contrib.keras.layers.Dense(units=1, activation='tanh', use_bias=True)
-            self._att3 = att3 = tf.contrib.keras.layers.Dense(units=1, activation='tanh', use_bias=True)
+            self._att1 = att1 = tf.keras.layers.Dense(units=1, activation='tanh', use_bias=True)
+            self._att3 = att3 = tf.keras.layers.Dense(units=1, activation='tanh', use_bias=True)
 
             # gru_+att1
             mp1_b = conv1(gru_1(AM_desc1_batch))
             mp2_b = conv1(gru_1(AM_desc2_batch))
 
-            att1_w = tf.contrib.keras.activations.softmax(att1(mp1_b), axis=-2)
-            att2_w = tf.contrib.keras.activations.softmax(att1(mp2_b), axis=-2)
+            att1_w = tf.keras.activations.softmax(att1(mp1_b), axis=-2)
+            att2_w = tf.keras.activations.softmax(att1(mp2_b), axis=-2)
 
             size1 = self.default_desc_length
 
@@ -343,8 +343,8 @@ class KDCoE(BasicModel):
             mp1_b = gru_5(mp1_b)
             mp2_b = gru_5(mp2_b)
 
-            att1_w = tf.contrib.keras.activations.softmax(att3(mp1_b), axis=-2)
-            att2_w = tf.contrib.keras.activations.softmax(att3(mp2_b), axis=-2)
+            att1_w = tf.keras.activations.softmax(att3(mp1_b), axis=-2)
+            att2_w = tf.keras.activations.softmax(att3(mp2_b), axis=-2)
 
             mp1_b = tf.multiply(mp1_b, att1_w)
             mp2_b = tf.multiply(mp2_b, att2_w)

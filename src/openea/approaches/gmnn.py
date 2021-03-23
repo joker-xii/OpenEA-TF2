@@ -1,6 +1,6 @@
 import time
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import numpy as np
 
 import multiprocessing
@@ -342,7 +342,7 @@ def random(shape, name=None):
     # tf.get_variable('W_train',
     #                 shape=[self.word_vocab_size, self.word_embedding_dim],
     # initializer=tf.contrib.layers.xavier_initializer()
-    return tf.get_variable(name=name, shape=shape, initializer=tf.contrib.layers.xavier_initializer())
+    return tf.get_variable(name=name, shape=shape, initializer=tf.initializers.glorot_uniform())
 
 
 class LayerUtils:
@@ -364,7 +364,7 @@ class LayerUtils:
         with tf.variable_scope(scope_name, reuse=reuse):
             if use_cudnn:
                 inputs = tf.transpose(input_reps, [1, 0, 2])
-                lstm = tf.contrib.cudnn_rnn.CudnnLSTM(1, lstm_dim, direction="bidirectional",
+                lstm = tf.keras.layers.CuDNNLSTM(1, lstm_dim, direction="bidirectional",
                                                       name="{}_cudnn_bi_lstm".format(scope_name),
                                                       dropout=dropout_rate if is_training else 0)
                 outputs, _ = lstm(inputs)
@@ -649,8 +649,8 @@ class Dense(Layer):
         with tf.variable_scope(self.name + '_vars'):
             self.vars['weights'] = tf.get_variable('weights', shape=(input_dim, output_dim),
                                                    dtype=tf.float32,
-                                                   initializer=tf.contrib.layers.xavier_initializer(),
-                                                   regularizer=tf.contrib.layers.l2_regularizer(0.0000))
+                                                   initializer=tf.initializers.glorot_uniform(),
+                                                   regularizer=tf.keras.regularizers.L2(0.0000))
             if self.bias:
                 self.vars['bias'] = zeros([output_dim], name='bias')
 
@@ -1078,7 +1078,7 @@ class SeqAggregator(Layer):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.neigh_input_dim = neigh_input_dim
-        self.cell = tf.contrib.rnn.BasicLSTMCell(self.hidden_dim)
+        self.cell = tf.nn.rnn_cell.BasicLSTMCell(self.hidden_dim)
 
     def _call(self, inputs):
         self_vecs, neigh_vecs = inputs
@@ -1232,7 +1232,7 @@ class GraphMatchNN(object):
                                                               self.pretrained_word_embeddings), trainable=True),
                                           tf.get_variable('W_train',
                                                           shape=[self.learned_word_size, self.word_embedding_dim],
-                                                          initializer=tf.contrib.layers.xavier_initializer(),
+                                                          initializer=tf.initializers.glorot_uniform(),
                                                           trainable=True)], 0)
 
         self.watch['word_embeddings'] = self.word_embeddings
@@ -1548,11 +1548,11 @@ class GraphMatchNN(object):
         else:
             cell_list = []
             for i in range(num_layers):
-                single_cell = tf.contrib.rnn.BasicLSTMCell(hidden_size)
+                single_cell = tf.nn.rnn_cell.BasicLSTMCell(hidden_size)
                 if self.mode == "train" and self.dropout > 0.0:
                     single_cell = tf.nn.rnn_cell.DropoutWrapper(single_cell, self.dropout)
                 cell_list.append(single_cell)
-            return tf.contrib.rnn.MultiRNNCell(cell_list)
+            return tf.nn.rnn_cell.MultiRNNCell(cell_list)
 
     def gcn_encode(self, batch_nodes, embedded_node_rep, fw_adj_info, bw_adj_info, input_node_dim, output_node_dim,
                    fw_aggregators, bw_aggregators, window_size, layer_size, scope, agg_type, sample_size_per_layer,

@@ -3,7 +3,7 @@ import multiprocessing as mp
 import random
 import time
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import openea.modules.train.batch as bat
 from openea.models.trans.transe import BasicModel
@@ -12,7 +12,6 @@ from openea.modules.utils.util import load_session
 from openea.modules.base.optimizers import generate_optimizer
 from openea.modules.utils.util import task_divide
 from openea.modules.finding.evaluation import early_stop
-
 
 class ProjE(BasicModel):
 
@@ -52,14 +51,14 @@ class ProjE(BasicModel):
             phs = tf.nn.embedding_lookup(self.ent_embeds, self.pos_hs)
             prs = tf.nn.embedding_lookup(self.rel_embeds, self.pos_rs)
         with tf.variable_scope('input_bn', reuse=tf.AUTO_REUSE):
-            bn_phs = tf.contrib.layers.batch_norm(phs, scope='bn')
-            bn_prs = tf.contrib.layers.batch_norm(prs, reuse=True, scope='bn')
+            bn_phs = tf.keras.layers.BatchNormalization(phs, scope='bn')
+            bn_prs = tf.keras.layers.BatchNormalization(prs, reuse=True, scope='bn')
         with tf.variable_scope('mlp', reuse=tf.AUTO_REUSE):
             out_prs = bn_phs * tf.get_variable('mlp_w', [self.args.dim]) + \
                       bn_prs * tf.get_variable('mlp_w', [self.args.dim]) + \
                       tf.get_variable('mlp_bias', [self.args.dim])
         with tf.variable_scope('output_bn', reuse=tf.AUTO_REUSE):
-            bn_out_prs = tf.contrib.layers.batch_norm(out_prs, scope='bn')
+            bn_out_prs = tf.keras.layers.BatchNormalization(out_prs, scope='bn')
         with tf.name_scope('triple_loss'):
             triple_loss = tf.nn.nce_loss(
                 weights=self.entity_w,

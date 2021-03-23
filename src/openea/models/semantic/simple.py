@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from sklearn import preprocessing
 
 import openea.modules.load.read as rd

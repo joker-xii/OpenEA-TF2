@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from openea.modules.utils.util import load_session
 from openea.models.basic_model import BasicModel

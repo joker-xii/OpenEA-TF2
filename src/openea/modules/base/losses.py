@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def get_loss_func(phs, prs, pts, nhs, nrs, nts, args):

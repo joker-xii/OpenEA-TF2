@@ -74,7 +74,8 @@ class AutoEncoderModel:
     def encoder(self, input_data):
         input_layer = input_data
         for i in range(self.layer_num):
-            input_layer = tf.add(tf.matmul(input_layer, self.weights['encoder_h' + str(i)]), self.biases['encoder_b' + str(i)])
+            input_layer = tf.add(tf.matmul(input_layer, self.weights['encoder_h' + str(i)]),
+                                 self.biases['encoder_b' + str(i)])
             if self.args.encoder_active == 'sigmoid':
                 input_layer = tf.nn.sigmoid(input_layer)
             elif self.args.encoder_active == 'tanh':
@@ -85,7 +86,8 @@ class AutoEncoderModel:
     def decoder(self, input_data):
         input_layer = input_data
         for i in range(self.layer_num):
-            input_layer = tf.add(tf.matmul(input_layer, self.weights['decoder_h' + str(i)]), self.biases['decoder_b' + str(i)])
+            input_layer = tf.add(tf.matmul(input_layer, self.weights['decoder_h' + str(i)]),
+                                 self.biases['decoder_b' + str(i)])
             if self.args.encoder_active == 'sigmoid':
                 input_layer = tf.nn.sigmoid(input_layer)
             elif self.args.encoder_active == 'tanh':
@@ -172,10 +174,10 @@ def generate_unlisted_word2vec(word2vec, literal_list, vector_dimension):
     print(alphabet)
     print('len(alphabet):', len(alphabet), '\n')
     char_sequences = [list(word) for word in unlisted_words]
-    model = Word2Vec(char_sequences, size=vector_dimension, window=5, min_count=1)
+    model = Word2Vec(char_sequences, vector_size=vector_dimension, window=5, min_count=1)
     for ch in alphabet:
-        assert ch in model
-        character_vectors[ch] = model[ch]
+        assert ch in model.wv
+        character_vectors[ch] = model.wv[ch]
 
     word2vec_new = {}
     for word in unlisted_words:
@@ -212,6 +214,3 @@ class LiteralEncoder:
         for i in range(self.args.encoder_epoch):
             encoder_model.train_one_epoch(i + 1)
         self.encoded_literal_vector = encoder_model.encoder_multi_batches(literal_vector_list)
-
-
-

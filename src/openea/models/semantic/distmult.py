@@ -2,7 +2,7 @@ import multiprocessing as mp
 import random
 import time
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import openea.modules.train.batch as bat
 from openea.models.basic_model import BasicModel

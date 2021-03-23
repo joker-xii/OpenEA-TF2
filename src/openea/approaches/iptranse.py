@@ -1,5 +1,5 @@
 import math
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import time
 import sys
 import random

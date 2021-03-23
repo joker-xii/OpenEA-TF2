@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 import scipy
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import scipy.sparse as sp
 
 from scipy.sparse.linalg.eigen.arpack import eigsh
@@ -564,7 +564,7 @@ class GraphConvolution:
             self.kernels.append(tf.get_variable(self.name + '_kernel_' + str(i),
                                                 shape=(self.input_dim, self.output_dim),
                                                 initializer=tf.glorot_uniform_initializer(),
-                                                regularizer=tf.contrib.layers.l2_regularizer(scale=0.01),
+                                                regularizer=tf.keras.regularizers.L2(scale=0.01),
                                                 dtype=self.data_type))
         if self.use_bias:
             self.bias = tf.get_variable(self.name + '_bias', shape=[self.output_dim, ],
@@ -605,7 +605,7 @@ class HighwayLayer:
     def _get_variable(self):
         self.weight = tf.get_variable(self.name + 'kernel', shape=self.input_shape,
                                       initializer=tf.glorot_uniform_initializer(),
-                                      regularizer=tf.contrib.layers.l2_regularizer(scale=0.01),
+                                      regularizer=tf.keras.regularizers.L2(scale=0.01),
                                       dtype=self.data_type)
         self.activation = tf.tanh
         self.batch_normal = tf.keras.layers.BatchNormalization()
@@ -641,15 +641,15 @@ class AliNetGraphAttentionLayer:
     def _get_variable(self):
         self.kernel = tf.get_variable(self.name + '_kernel', shape=(self.input_dim, self.output_dim),
                                       initializer=tf.glorot_uniform_initializer(),
-                                      regularizer=tf.contrib.layers.l2_regularizer(scale=0.01),
+                                      regularizer=tf.keras.regularizers.L2(scale=0.01),
                                       dtype=self.data_type)
         self.kernel1 = tf.get_variable(self.name + '_kernel_1', shape=(self.input_dim, self.input_dim),
                                        initializer=tf.glorot_uniform_initializer(),
-                                       regularizer=tf.contrib.layers.l2_regularizer(scale=0.01),
+                                       regularizer=tf.keras.regularizers.L2(scale=0.01),
                                        dtype=self.data_type)
         self.kernel2 = tf.get_variable(self.name + '_kernel_2', shape=(self.input_dim, self.input_dim),
                                        initializer=tf.glorot_uniform_initializer(),
-                                       regularizer=tf.contrib.layers.l2_regularizer(scale=0.01),
+                                       regularizer=tf.keras.regularizers.L2(scale=0.01),
                                        dtype=self.data_type)
         self.batch_normlization = tf.keras.layers.BatchNormalization()
 

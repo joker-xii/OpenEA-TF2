@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from openea.modules.base.optimizers import generate_optimizer
 from openea.modules.utils.util import load_session

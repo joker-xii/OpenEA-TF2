@@ -1,7 +1,6 @@
 import itertools
 import time
 
-import igraph as ig
 import numpy as np
 
 
@@ -9,7 +8,7 @@ def find_potential_alignment_greedily(sim_mat, sim_th):
     return find_alignment(sim_mat, sim_th, 1)
 
 
-def find_potential_alignment_mwgm(sim_mat, sim_th, k, heuristic=True):
+def find_potential_alignment_mwgm(sim_mat, sim_th, k, heuristic=False):
     t = time.time()
     potential_aligned_pairs = find_alignment(sim_mat, sim_th, k)
     if potential_aligned_pairs is None:
@@ -111,6 +110,7 @@ def mwgm_graph_tool(pairs, sim_mat):
 
 
 def mwgm_igraph(pairs, sim_mat):
+    import igraph as ig
     if not isinstance(pairs, list):
         pairs = list(pairs)
     index_id_dic1, index_id_dic2 = dict(), dict()

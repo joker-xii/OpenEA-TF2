@@ -2,8 +2,9 @@ import math
 import random
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from sklearn import preprocessing
+import tensorflow as tf2
 
 
 def init_embeddings(shape, name, init, is_l2_norm, dtype=tf.float32):
@@ -22,7 +23,7 @@ def init_embeddings(shape, name, init, is_l2_norm, dtype=tf.float32):
 def xavier_init(shape, name, is_l2_norm, dtype=None):
     with tf.name_scope('xavier_init'):
         embeddings = tf.get_variable(name, shape=shape, dtype=dtype,
-                                     initializer=tf.contrib.layers.xavier_initializer(uniform=False))
+                                     initializer=tf2.initializers.glorot_normal())
     return tf.nn.l2_normalize(embeddings, 1) if is_l2_norm else embeddings
 
 

@@ -4,7 +4,7 @@ import multiprocessing as mp
 import random
 import time
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from openea.modules.finding.evaluation import early_stop
 import openea.modules.train.batch as bat
