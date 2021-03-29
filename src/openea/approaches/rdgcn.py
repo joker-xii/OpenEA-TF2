@@ -13,6 +13,47 @@ from openea.models.basic_model import BasicModel
 from sklearn import preprocessing
 from openea.approaches.literal_encoder import LiteralEncoder
 
+try:
+    import faiss
+except:
+    faiss = None
+if faiss is not None:
+
+    def faiss_search_impl(emb_q, emb_id, emb_size, shift, k=50, search_batch_sz=50000, gpu=True):
+        index = faiss.IndexFlat(emb_size)
+        if gpu:
+            index = faiss.index_cpu_to_all_gpus(index)
+        index.add(emb_id)
+        print('Total index =', index.ntotal)
+        vals, inds = [], []
+        for i_batch in range(0, len(emb_q), search_batch_sz):
+            val, ind = index.search(emb_q[i_batch:min(i_batch + search_batch_sz, len(emb_q))], k)
+            val = 1 - val
+            vals.append(val)
+            inds.append(ind + shift)
+            # print(vals[-1].size())
+            # print(inds[-1].size())
+        del index, emb_id, emb_q
+        vals, inds = np.concatenate(vals), np.concatenate(inds)
+        return vals, inds
+
+
+    def faiss_search(embs, k=50, search_batch_sz=50000, index_batch_sz=500000, gpu=False):
+        print('FAISS number of GPUs=', faiss.get_num_gpus())
+        size = [embs[0].shape[0], embs[1].shape[0]]
+        emb_size = embs[0].shape[1]
+        emb_q, emb_id = embs
+        vals, inds = [], []
+        total_size = emb_id.shape[0]
+        for i_batch in range(0, total_size, index_batch_sz):
+            i_end = min(total_size, i_batch + index_batch_sz)
+            val, ind = faiss_search_impl(emb_q, emb_id[i_batch:i_end], emb_size, i_batch, k, search_batch_sz, gpu)
+            vals.append(val)
+            inds.append(ind)
+
+        vals, inds = np.concatenate(vals, axis=1), np.concatenate(inds, axis=1)
+        return vals, inds
+
 
 def rfunc(triple_list, ent_num, rel_num):
     head = dict()
@@ -77,12 +118,13 @@ def get_neg(ILL, output_layer, k):
     t = len(ILL)
     ILL_vec = np.array([output_layer[e1] for e1 in ILL])
     KG_vec = np.array(output_layer)
-    sim = scipy.spatial.distance.cdist(ILL_vec, KG_vec, metric='cityblock')
-    for i in range(t):
-        rank = sim[i, :].argsort()
-        neg.append(rank[0:k])
-
-    neg = np.array(neg)
+    if faiss is None:
+        sim = scipy.spatial.distance.cdist(ILL_vec, KG_vec, metric='cityblock')
+        for i in range(t):
+            rank = sim[i, :].argsort()
+            neg.append(rank[0:k])
+    else:
+        neg = (faiss_search((ILL_vec, KG_vec), k, gpu=False)[1]).cpu().numpy()
     neg = neg.reshape((t * k,))
     return neg
 
